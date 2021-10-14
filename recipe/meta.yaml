@@ -1,5 +1,5 @@
 {% set name = "setuptools-github" %}
-{% set version = "0.1.0" %}
+{% set version = "0.1.1" %}
 
 package:
   name: {{ name|lower }}
@@ -7,12 +7,12 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 51c0bd2fc6f4d703e87e0a78a97d6bc323a88d4559fc85598e44077e297368cb
+  sha256: 98ff5244f01c0835dbb0836c3933d4ccee827ec30af0cc0ded6590bee4df654d
 
 build:
   noarch: python
   number: 0
-  script: "{{ PYTHON }} -m pip install . -vv"
+  script: {{ PYTHON }} -m pip install . -vv
 
 requirements:
   host:
@@ -36,7 +36,7 @@ about:
   home: https://github.com/cav71/setuptools-github
   license: BSD-2-Clause
   license_family: BSD
-  summary: 'Supports github releases'
+  summary: Supports github releases
   license_file: LICENSE
   description: |
     Follow a well defined github release process
