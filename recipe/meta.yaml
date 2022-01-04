@@ -27,6 +27,7 @@ test:
     - pip
     - pytest
     - setuptools
+    - pygit2
   source_files:
     - tests
   commands:
