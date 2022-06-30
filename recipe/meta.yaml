@@ -28,7 +28,7 @@ test:
     - pytest
     - setuptools
     - pygit2
-    - types-mypy-extensions
+    - mypy_extensions
   source_files:
     - tests
   commands:
