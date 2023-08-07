@@ -1,0 +1,50 @@
+diff --git a/src/setuptools_github/build.json b/src/setuptools_github/build.json
+new file mode 100644
+index 0000000..9673090
+--- /dev/null
++++ b/src/setuptools_github/build.json
+@@ -0,0 +1,6 @@
++{
++    "ref": "refs/tags/release/0.3.7",
++    "sha": "840502ebc91cbc647105367d4571689f8fb5faf5",
++    "run_number": "20",
++    "run_id": "5772027742"
++}
+diff --git a/src/setuptools_github/tools.py b/src/setuptools_github/tools.py
+index 97a844e..a262a4b 100644
+--- a/src/setuptools_github/tools.py
++++ b/src/setuptools_github/tools.py
+@@ -270,14 +270,21 @@ def get_data(
+     }
+ 
+     path = Path(version_file)
++    build = path.parent / "build.json"
+     repo = scm.lookup(path)
+ 
+-    if not (repo or github_dump):
++    if not (repo or github_dump or build.exists()):
+         if abort:
+             raise scm.InvalidGitRepoError(f"cannot find a valid git repo for {path}")
+         return result
+ 
+-    if not github_dump and repo:
++    if github_dump:
++        gdata = json.loads(github_dump) if isinstance(github_dump, str) else github_dump
++        dirty = False
++    elif build.exists():
++        gdata = json.loads(build.read_text())
++        dirty = False
++    else:
+         gdata = {
+             "ref": repo.head.name,
+             "sha": repo.head.target.hex[:7],
+@@ -285,9 +292,6 @@ def get_data(
+             "run_id": 0,
+         }
+         dirty = repo.dirty()
+-    else:
+-        gdata = json.loads(github_dump) if isinstance(github_dump, str) else github_dump
+-        dirty = False
+ 
+     expr = re.compile(r"/(?P<what>beta|release)/(?P<version>\d+([.]\d+)*)$")
+     expr1 = re.compile(r"(?P<version>\d+([.]\d+)*)(?P<num>b\d+)?$")

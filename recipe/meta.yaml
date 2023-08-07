@@ -8,6 +8,8 @@ package:
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
   sha256: 9465b0a72f5c7c5d32df3cb378c192f81dcb820f36241b1632ef3f7566f86f59
+  patches:
+    - conda.patch
 
 build:
   noarch: python
@@ -18,10 +20,14 @@ requirements:
   host:
     - python >=3.8
     - pip
+    - jinja2
+    - typing_extensions
     - mypy_extensions
   run:
     - python >=3.8
     - setuptools
+    - jinja2
+    - typing_extensions
     - mypy_extensions
 
 test:
