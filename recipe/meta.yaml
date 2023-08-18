@@ -16,11 +16,17 @@ build:
 
 requirements:
   host:
-    - python >=3.6
+    - python >=3.8
     - pip
+    - jinja2
+    - typing_extensions
+    - mypy_extensions
   run:
-    - python >=3.6
+    - python >=3.8
     - setuptools
+    - jinja2
+    - typing_extensions
+    - mypy_extensions
 
 test:
   requires:
