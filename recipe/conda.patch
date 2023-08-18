@@ -1,50 +1,94 @@
-diff --git a/src/setuptools_github/build.json b/src/setuptools_github/build.json
-new file mode 100644
-index 0000000..9673090
---- /dev/null
-+++ b/src/setuptools_github/build.json
-@@ -0,0 +1,6 @@
-+{
-+    "ref": "refs/tags/release/0.3.7",
-+    "sha": "840502ebc91cbc647105367d4571689f8fb5faf5",
-+    "run_number": "20",
-+    "run_id": "5772027742"
-+}
+diff --git a/src/setuptools_github/__init__.py b/src/setuptools_github/__init__.py
+index 850e2b3..67180fc 100644
+--- a/src/setuptools_github/__init__.py
++++ b/src/setuptools_github/__init__.py
+@@ -1,2 +1,2 @@
+ __version__ = "0.3.10"
+-__hash__ = "2aa89736f1c56bc6a807764c2ab41386cf131bd9"
++__hash__ = "2aa8973"
+diff --git a/src/setuptools_github/_build.py b/src/setuptools_github/_build.py
+index f4175da..d4f35ea 100644
+--- a/src/setuptools_github/_build.py
++++ b/src/setuptools_github/_build.py
+@@ -1,8 +1,17 @@
+ # autogenerate build file
++# gdata
+ branch = 'refs/tags/release/0.3.10'
+ build = '23'
+ current = '0.3.10'
+ hash = '2aa89736f1c56bc6a807764c2ab41386cf131bd9'
++ref = 'release/0.3.10'
++run_id = '5904419528'
++run_number = '23'
+ runid = '5904419528'
++sha = '2aa8973'
+ version = '0.3.10'
+ workflow = 'tags'
++# data
++runid = '5904419528'
++version = '0.3.10'
++workflow = 'release/0.3.10'
 diff --git a/src/setuptools_github/tools.py b/src/setuptools_github/tools.py
-index 97a844e..a262a4b 100644
+index 6e8ff4c..a34b103 100644
 --- a/src/setuptools_github/tools.py
 +++ b/src/setuptools_github/tools.py
-@@ -270,14 +270,21 @@ def get_data(
-     }
- 
-     path = Path(version_file)
-+    build = path.parent / "build.json"
-     repo = scm.lookup(path)
- 
--    if not (repo or github_dump):
-+    if not (repo or github_dump or build.exists()):
-         if abort:
-             raise scm.InvalidGitRepoError(f"cannot find a valid git repo for {path}")
-         return result
- 
--    if not github_dump and repo:
-+    if github_dump:
-+        gdata = json.loads(github_dump) if isinstance(github_dump, str) else github_dump
-+        dirty = False
-+    elif build.exists():
-+        gdata = json.loads(build.read_text())
-+        dirty = False
-+    else:
+@@ -300,9 +300,11 @@ def get_data(
+     dirty = False
+     if github_dump:
+         gdata = json.loads(github_dump) if isinstance(github_dump, str) else github_dump
++        print(f" 111111 >>> {gdata=}")
+     elif record_path and record_path.exists():
+         mod = loadmod(record_path)
+         gdata = {k: getattr(mod, k) for k in dir(mod) if not k.startswith("_")}
++        print(f" 222222 >>> {record_path=}, {gdata=}")
+     elif repo:
          gdata = {
              "ref": repo.head.name,
-             "sha": repo.head.target.hex[:7],
-@@ -285,9 +292,6 @@ def get_data(
+@@ -310,6 +312,7 @@ def get_data(
+             "run_number": 0,
              "run_id": 0,
          }
++        print(f" 333333 >>> {gdata=}")
          dirty = repo.dirty()
--    else:
--        gdata = json.loads(github_dump) if isinstance(github_dump, str) else github_dump
--        dirty = False
- 
+     else:
+         raise RuntimeError("un-reacheable code")
+@@ -317,7 +320,11 @@ def get_data(
      expr = re.compile(r"/(?P<what>beta|release)/(?P<version>\d+([.]\d+)*)$")
      expr1 = re.compile(r"(?P<version>\d+([.]\d+)*)(?P<num>b\d+)?$")
+ 
+-    result["branch"] = lstrip(gdata["ref"], "refs/heads/")
++    try: 
++        result["branch"] = lstrip(gdata["ref"], "refs/heads/")
++    except:
++        print(f"------> {gdata=}")
++        raise
+     result["hash"] = gdata["sha"] + ("*" if dirty else "")
+     result["build"] = gdata["run_number"]
+     result["runid"] = gdata["run_id"]
+@@ -405,7 +412,7 @@ def process(
+                 yield (name, value)
+ 
+     record_path = (Path(version_file).parent / record).absolute() if record else None
+-    data, _ = get_data(version_file, github_dump, record_path, abort)
++    data, gdata = get_data(version_file, github_dump, record_path, abort)
+     set_module_var(version_file, "__version__", data["version"])
+     set_module_var(version_file, "__hash__", data["hash"])
+ 
+@@ -420,7 +427,16 @@ def process(
+         record_path.parent.mkdir(parents=True, exist_ok=True)
+         with record_path.open("w") as fp:
+             print("# autogenerate build file", file=fp)
+-            for key, value in sorted((data or {}).items()):
++            print("# gdata", file=fp)
++            for key, value in sorted((gdata or {}).items()):
++                value = f"'{value}'" if isinstance(value, str) else value
++                print(f"{key} = {value}", file=fp)
++
++            print("# data", file=fp)
++            for key in sorted(["version", "hash", "runid", "workflow"]):
++                if key not in data:
++                    continue
++                value = data[key]
+                 value = f"'{value}'" if isinstance(value, str) else value
+                 print(f"{key} = {value}", file=fp)
+ 
