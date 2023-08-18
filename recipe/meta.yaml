@@ -1,5 +1,5 @@
 {% set name = "setuptools-github" %}
-{% set version = "0.3.10" %}
+{% set version = "0.4.0" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/{{ name }}-{{ version }}.tar.gz
-  sha256: 2cf58a673ce4f69e0f5b1793bae95d30c2e1e780ecfd4e02ec21eca130a8498c
+  sha256: f86d2f633e74205c755b016ad6b63328cbeca84a59e7017148fcc0258560701d
   patches:
     - conda.patch
 
